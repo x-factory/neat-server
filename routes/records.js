@@ -5,7 +5,11 @@ var api = express.Router();
 api.route('/records')
 .get(function(req, res) {
   models.Record.findAll({
-    include: [ models.Location, models.User, models.Type ]
+    include: [
+      { model: models.User, attributes: ['name', 'email', 'privilege'] },
+      models.Location,
+      models.Type
+    ]
   }).then(function(records) {
     res.json({ records: records });
   }, function(error) {
