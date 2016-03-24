@@ -61,13 +61,13 @@ api.route('/users/:user_id')
       return hardDelete // set acitve to null as soft delete
         ? models.User.destroy(where)
         : models.User.update({ active: null }, where);
-    }).then(function ffHardOrSoftDeleteUser(user) {
-      if (user === 0) {
+    }).then(function ffHardOrSoftDeleteUser(result) {
+      if (result === 0) {
         res.status(400).json({ message: 'User does not exist' });
-      } else if (user === 1) { // hard delete successful
+      } else if (result === 1) { // hard delete successful
         res.json({ message: 'Deleted user' });
       } else { // soft delete successful
-        res.json({ message: 'Disabled user (active -> null)', user: user });
+        res.json({ message: 'Disabled user (active -> null)', user: result });
       }
     }).catch(function deleteUserCatchAll(error) {
       res.status(500).json({

@@ -13,8 +13,8 @@ module.exports = function(sequelize, DataTypes) {
     },
     password: DataTypes.STRING(60), // npm bcrypt
     privilege: {
-      type: DataTypes.CHAR(1),
-      validate: { isIn: [['A', 'M']] },
+      type: DataTypes.ENUM,
+      values: ['A', 'M'],
       defaultValue: 'M',
       allowNull: false
     },
