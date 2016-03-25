@@ -75,7 +75,7 @@ api.route('/user/:user_id')
       }
     }).catch(function deleteUserCatchAll(error) {
       res.status(500).json({
-        message: 'Failed to delete user', details: error
+        message: 'Error deleting user', details: error
       });
     });
   });

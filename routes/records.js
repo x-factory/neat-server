@@ -96,6 +96,43 @@ api.route('/record/:record_id')
           });
       }
     });
+  })
+  .delete(function deleteRecord(req, res) {
+    var prevLocationId;
+    var recordId = req.params.record_id;
+    var recordStatus = {};
+    models.Record.findById(recordId)
+    .then(function ffFindRecordById(record) {
+      if (record) {
+        prevLocationId = record.LocationId;
+      }
+      return models.Record.destroy({ where: {id: recordId} });
+    }).then(function ffDestroyRecord(result) {
+      recordStatus.destroyed = result === 1;
+      return models.Record.count({
+        where: { LocationId: prevLocationId }
+      });
+    }).then(function ffCountRecord(count) {
+      if (count === 0) { // no more associated records, delete location
+        return models.Location.destroy({
+          where: { id: prevLocationId }
+        });
+      }
+      return false;
+    }).then(function ffDestroyLocation(result) {
+      recordStatus.locationDestroyed = result === 1;
+      if (!recordStatus.destroyed) {
+        res.status(400).json({
+          message: 'Record does not exist', status: recordStatus
+        });
+      } else {
+        res.json({ message: 'Deleted record', status: recordStatus });
+      }
+    }).catch(function deleteRecordCatchAll(error) {
+      res.status(500).json({
+        message: 'Error deleting record', details: error
+      });
+    });
   });
 
 api.route('/records/:user_id')
