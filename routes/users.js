@@ -48,15 +48,14 @@ api.route('/users/:user_id')
   })
   .delete(function deleteUser(req, res) {
     var hardDelete = false;
-    models.Record.count({ // check if there are associated records
-      where: {
-        UserId: req.params.user_id
-      }
-    }).then(function ffCount(count) {
-      hardDelete = count === 0;
-      return models.User.findById(req.params.user_id);
-    }).then(function ffFindUserById(user) {
-      hardDelete = hardDelete || (user && user.active === null);
+    models.User.findById(req.params.user_id)
+    .then(function ffFindUserById(user) {
+      hardDelete = user && user.active === null; 
+      return user
+        ? user.countRecords()
+        : 0;
+    }).then(function ffCountRecords(count) {
+      hardDelete = hardDelete || count === 0;
       var where = { where: { id: req.params.user_id } };
       return hardDelete // set acitve to null as soft delete
         ? models.User.destroy(where)

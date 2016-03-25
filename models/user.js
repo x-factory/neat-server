@@ -25,7 +25,7 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     classMethods: {
       associate: function(models) {
-        User.hasMany(models.Record);
+        User.belongsToMany(models.Record, { through: 'UserRecord' });
       }
     }
   });
