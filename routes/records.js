@@ -59,7 +59,7 @@ api.route('/records')
     });
   });
 
-api.route('/records/:record_id')
+api.route('/record/:record_id')
   .put(function putRecord(req, res) {
     var defaultLocation = {
       longitude: req.body.long,

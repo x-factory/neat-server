@@ -39,7 +39,7 @@ api.route('/users')
     });
   });
 
-api.route('/users/:user_id')
+api.route('/user/:user_id')
   .get(function(req, res) {
     models.User.findById(req.params.user_id)
       .then(function(user) {
