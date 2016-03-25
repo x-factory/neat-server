@@ -6,7 +6,15 @@ api.route('/records')
   .get(function getRecord(req, res) {
     models.Record.findAll({
       include: [
-        { model: models.User, attributes: ['name', 'email', 'privilege'] },
+        {
+          model: models.User,
+          as: 'createdBy',
+          attributes: ['name', 'email']
+        }, {
+          model: models.User,
+          as: 'lastEditedBy',
+          attributes: ['name', 'email']
+        },
         models.Location,
         models.Type
       ]
@@ -32,7 +40,7 @@ api.route('/records')
       return models.Record.create({
         description: req.body.description,
         severity: req.body.severity,
-        UserId: req.body.user_id,
+        CreatorId: req.body.user_id,
         LocationId: location.id,
         TypeId: req.body.type
       });
@@ -46,6 +54,45 @@ api.route('/records')
         default:
           res.status(500).json({
             message: 'Error creating record', details: error
+          });
+      }
+    });
+  });
+
+api.route('/record/:record_id')
+  .put(function putRecord(req, res) {
+    var defaultLocation = {
+      longitude: req.body.long,
+      latitude: req.body.lat
+    };
+    if (req.body.address) defaultLocation.address = req.body.address;
+    models.Location.findOrCreate({
+      where: {
+        longitude: req.body.long,
+        latitude: req.body.lat
+      },
+      defaults: defaultLocation
+    }).spread(function ffFindOrCreateLocation(location, created) {
+      return models.Record.update({
+        description: req.body.description,
+        severity: req.body.severity,
+        UserId: req.body.user_id,
+        LocationId: location.id,
+        TypeId: req.body.type
+      }, {
+        where: { id: req.params.record_id },
+        returning: true
+      });
+    }).then(function ffUpdateRecord(affected) {
+      res.json({ message: 'Updated record', affected: affected });
+    }).catch(function putRecordCatchAll(error) {
+      switch (error.name) {
+        case 'SequelizeValidationError':
+          res.status(400).json({ message: 'Invalid fields', details: error });
+          break;
+        default:
+          res.status(500).json({
+            message: 'Error updating record', details: error
           });
       }
     });
