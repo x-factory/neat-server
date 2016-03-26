@@ -42,7 +42,7 @@ api.route('/records')
         severity: req.body.severity,
         CreatorId: req.body.user_id,
         LocationId: location.id,
-        TypeId: req.body.type
+        TypeId: req.body.type_id
       });
     }).then(function ffCreateRecord(record) {
       res.status(201).json({ message: 'Created record', record: record });
@@ -78,7 +78,7 @@ api.route('/record/:record_id')
         severity: req.body.severity,
         UserId: req.body.user_id,
         LocationId: location.id,
-        TypeId: req.body.type
+        TypeId: req.body.type_id
       }, {
         where: { id: req.params.record_id },
         returning: true
@@ -109,7 +109,7 @@ api.route('/record/:record_id')
       return models.Record.destroy({ where: {id: recordId} });
     }).then(function ffDestroyRecord(result) {
       recordStatus.destroyed = result === 1;
-      return models.Record.count({
+      return models.Record.count({ // count associated location
         where: { LocationId: prevLocationId }
       });
     }).then(function ffCountRecord(count) {
