@@ -3,7 +3,9 @@ var path = require('path');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
 
-var auth = require('./routes/auth');
+var auth = require('./middleware/auth');
+
+var entry = require('./routes/entry');
 var users = require('./routes/users');
 var records = require('./routes/records');
 var types = require('./routes/types');
@@ -14,7 +16,8 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use('/api', auth);
+app.use('/api', entry);
+app.use(auth); // protected routes below
 app.use('/api', users);
 app.use('/api', records);
 app.use('/api', types);
