@@ -3,6 +3,13 @@ var express = require('express');
 var _ = require('lodash');
 var api = express.Router();
 
+function adminRequired(req, res, next) {
+  if (!req.user.admin) {
+    return res.status(401).json({ message: 'User is not an admin' });
+  }
+  return next();
+}
+
 api.route('/users')
   .get(function getUser(req, res) {
     models.User.findAll({
@@ -13,7 +20,7 @@ api.route('/users')
       res.status(500).json({ message: 'Error finding user', details: error });
     });
   })
-  .post(function postUser(req, res) {
+  .post(adminRequired, function postUser(req, res) {
     models.User.create({
       name: req.body.name,
       email: req.body.email,
@@ -41,13 +48,14 @@ api.route('/users')
   });
 
 api.route('/user/:user_id')
+  // testing route, no use atm
   .get(function(req, res) {
     models.User.findById(req.params.user_id)
       .then(function(user) {
         res.json({ user: user });
       });
   })
-  .put(function putUser(req, res) {
+  .put(function putUserRuleCheck(req, res, next) {
     var userValues = {};
     var b = req.body;
     if (b.name)      userValues.name      = b.name;
@@ -57,7 +65,17 @@ api.route('/user/:user_id')
     if (_.isEmpty(userValues)) {
       return res.status(400).json({ message: 'No input provided' });
     }
-    models.User.update(userValues, {
+    var isAdminAction = b.privilege || b.active;
+    if (isAdminAction && !req.user.admin) {
+      return res.status(401).json({ message: 'User is not an admin' });
+    }
+    if (b.name && req.params.user_id != req.user.ownid) {
+      return res.status(401).json({ message: 'Can only self-rename' });
+    }
+    req.newUserValues = userValues;
+    return next();
+  }, function putUser(req, res) {
+    models.User.update(req.newUserValues, {
       where: { id: req.params.user_id },
       individualHooks: true,
       returning: true
@@ -71,7 +89,7 @@ api.route('/user/:user_id')
       res.status(500).json({ message: 'Error updating user', details: error });
     });
   })
-  .delete(function deleteUser(req, res) {
+  .delete(adminRequired, function deleteUser(req, res) {
     var hardDelete = false;
     var userId = req.params.user_id;
     models.Record.count({ // check if there are associated records

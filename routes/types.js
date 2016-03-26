@@ -7,7 +7,7 @@ api.route('/types')
     models.Type.findAll({
       include: [ models.Record ]
     }).then(function ffFindAllTypes(types) {
-      res.status(201).json({ types: types });
+      res.status(200).json({ types: types });
     }).catch(function getTypeCatchAll(error) {
       res.status(500).json({ message: 'Error finding types', details: error });
     });
