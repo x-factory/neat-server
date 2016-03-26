@@ -3,7 +3,7 @@ var path = require('path');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
 
-var routes = require('./routes/index');
+var auth = require('./routes/auth');
 var users = require('./routes/users');
 var records = require('./routes/records');
 var types = require('./routes/types');
@@ -14,7 +14,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use('/', routes);
+app.use('/api', auth);
 app.use('/api', users);
 app.use('/api', records);
 app.use('/api', types);

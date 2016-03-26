@@ -1,5 +1,6 @@
 var models = require('../models');
 var express = require('express');
+var _ = require('lodash');
 var api = express.Router();
 
 api.route('/users')
@@ -16,7 +17,7 @@ api.route('/users')
     models.User.create({
       name: req.body.name,
       email: req.body.email,
-      password: req.body.password,
+      // created user inactive by default therefore null password
       privilege: req.body.privilege
       // when first created, default to active: false
     }).then(function ffCreateUser(user) {
@@ -45,6 +46,30 @@ api.route('/user/:user_id')
       .then(function(user) {
         res.json({ user: user });
       });
+  })
+  .put(function putUser(req, res) {
+    var userValues = {};
+    var b = req.body;
+    if (b.name)      userValues.name      = b.name;
+    if (b.password)  userValues.password  = b.password;
+    if (b.privilege) userValues.privilege = b.privilege;
+    if (b.active)    userValues.active    = b.active;
+    if (_.isEmpty(userValues)) {
+      return res.status(400).json({ message: 'No input provided' });
+    }
+    models.User.update(userValues, {
+      where: { id: req.params.user_id },
+      individualHooks: true,
+      returning: true
+    }).then(function ffUpdateUser(affected) {
+      if (affected[0] === 0) {
+        res.status(400).json({ message: 'User does not exist' });
+      } else {
+        res.json({ message: 'Updated user', affected: affected });
+      }
+    }).catch(function putUserCatchAll(error) {
+      res.status(500).json({ message: 'Error updating user', details: error });
+    });
   })
   .delete(function deleteUser(req, res) {
     var hardDelete = false;
