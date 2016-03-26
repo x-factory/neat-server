@@ -35,6 +35,12 @@ module.exports = function(sequelize, DataTypes) {
         User.hasMany(models.Record);
       }
     },
+    instanceMethods: {
+      comparePassword: function comparePassword(password) {
+        var user = this;
+        return bcrypt.compare(password, user.password);
+      }
+    },
     hooks: {
       beforeUpdate: function beforeUserUpdate(user, options) {
         function storeHashedPw(hash) {
