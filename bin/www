@@ -20,27 +20,49 @@ app.set('port', port);
  * Create HTTP server after setting up database.
  * sync force true to drop database if exists
  */
+var defaultTypes = [
+  { name: 'Lighting' },
+  { name: 'Garbage' },
+  { name: 'Road Hazard' },
+  { name: 'Housing' },
+  { name: 'Graffiti' },
+  { name: 'Driveway' }
+];
+
+var defaultAdmin = {
+  name: 'X-Support',
+  email: process.env.SUPPORT_EMAIL,
+  privilege: 'A'
+};
+
 var server = http.createServer(app);
-models.sequelize.sync({force: true}).then(function() {
-  return models.Type.bulkCreate([
-    { name: 'Lighting' },
-    { name: 'Garbage' },
-    { name: 'Road Hazard' },
-    { name: 'Housing' },
-    { name: 'Graffiti' },
-    { name: 'Driveway' }
-  ]);
-}).then(function(created) {
-  // user for testing purpose
-  return models.User.create({
-    name: 'X-Support',
-    email: 'test@neat.com',
-    privilege: 'A'
+
+models.sequelize.sync({
+  force: app.get('env') === 'development'
+}).then(function() {
+
+  return models.Type.count();
+
+}).then(function(count) {
+  if (count > 0) {
+    return count;
+  }
+  // create default types no type in database
+  return models.Type.bulkCreate(defaultTypes);
+}).then(function(result) {
+  // create default admin if not exist
+  return models.User.findOrCreate({
+    where: {
+      email: defaultAdmin.email
+    },
+    defaults: defaultAdmin
   });
-}).then(function(user) {
-  return user.update({
-    password: 'iloveyou'
-  });
+}).spread(function(user, created) {
+  if (created) {
+    // set password for default admin
+    return user.update({ password: process.env.SUPPORT_PASS });
+  }
+  return user;
 }).then(function(ready) {
   /**
   * Listen on provided port, on all network interfaces.

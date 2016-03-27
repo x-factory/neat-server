@@ -2,7 +2,7 @@ var models = require('../models');
 var express = require('express');
 var bcrypt = require('bcrypt-as-promised');
 var jwt = require('jsonwebtoken');
-var jwtConf = require('../config/config.json').jwt;
+var secret = process.env.JWT_SECRET;
 var api = express.Router();
 
 api.post('/authenticate', function(req, res) {
@@ -22,7 +22,7 @@ api.post('/authenticate', function(req, res) {
     return null;
   }).then(function ffComparePassword(result) {
     if (result) {
-      var token = jwt.sign(userInfo, jwtConf.secret, {
+      var token = jwt.sign(userInfo, secret, {
         expiresInMinutes: 120
       });
       res.json({ message: 'Enjoy your token', token: token });
