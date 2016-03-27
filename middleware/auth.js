@@ -1,8 +1,8 @@
 var expressJwt = require('express-jwt');
-var jwtConf = require('../config/config.json').jwt;
+var jwtSecret = process.env.JWT_SECRET;
 
 var auth = expressJwt({
-  secret: jwtConf.secret,
+  secret: jwtSecret,
   getToken: function customGetToken(req) {
     var headAuth = req.headers.authorization;
     var isBearerStart = headAuth && headAuth.split(' ')[0] === 'Bearer';

@@ -34,12 +34,12 @@ models.sequelize.sync({force: true}).then(function() {
   // user for testing purpose
   return models.User.create({
     name: 'X-Support',
-    email: 'test@neat.com',
+    email: process.env.SUPPORT_EMAIL,
     privilege: 'A'
   });
 }).then(function(user) {
   return user.update({
-    password: 'iloveyou'
+    password: process.env.SUPPORT_PASS
   });
 }).then(function(ready) {
   /**
