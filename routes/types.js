@@ -26,7 +26,7 @@ api.route('/types')
     });
   });
 
-api.route('/types/:type_id')
+api.route('/type/:type_id')
   .delete(function deleteType(req, res) {
     models.Type.destroy({
       where: {
