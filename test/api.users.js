@@ -2,7 +2,7 @@ var supertest = require('supertest');
 var should = require('should');
 var server = supertest.agent('http://localhost:3000');
 
-describe('User APIs', function() {
+describe('/api/user*', function() {
   this.slow(250);
   var token;
 
