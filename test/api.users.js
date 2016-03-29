@@ -8,6 +8,7 @@ describe('/api/user*', function() {
   this.slow(250);
   var token;
   var standardToken; // non admin
+  var newuserId;
 
   before(function(done) {
     models.User.create({
@@ -115,6 +116,7 @@ describe('/api/user*', function() {
         .expect(201)
         .end(function(err, res) {
           var user = res.body.user;
+          newuserId = user.id;
           res.status.should.equal(201);
           user.privilege.should.equal('M');
           user.active.should.equal(false);
@@ -234,7 +236,7 @@ describe('/api/user*', function() {
     // TODO only self set password (without using user/1 token)
     it('should be able to set a user\'s password', function(done) {
       server
-        .put('/api/user/4') // newuser
+        .put('/api/user/' + newuserId) // newuser
         .send({ password: 'newpassword' })
         .set('Authorization', token)
         .expect('Content-Type', /json/)
@@ -253,7 +255,7 @@ describe('/api/user*', function() {
 
     it('should be able to reset a user\'s password', function(done) {
       server
-        .put('/api/user/4') // newuser
+        .put('/api/user/' + newuserId) // newuser
         .send({ password: 'null', active: 'No' })
         .set('Authorization', token)
         .expect('Content-Type', /json/)
@@ -296,7 +298,7 @@ describe('/api/user*', function() {
 
     it('should only allow admin to delete a user', function(done) {
       server
-        .del('/api/user/4') // newuser
+        .del('/api/user/' + newuserId) // newuser
         .set('Authorization', standardToken)
         .expect('Content-Type', /json/)
         .expect(401)
