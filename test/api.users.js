@@ -59,7 +59,6 @@ describe('/api/user*', function() {
           if (err) {
             throw err;
           }
-          console.log(standardToken);
           standardToken = 'Bearer ' + res.body.token;
           done();
         });
