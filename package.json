@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bin/www"
+    "start": "nodemon ./bin/www",
+    "test": "node seeders/initialize.js sync && mocha",
+    "stop": "node seeders/initialize.js sync && mocha -R nyan"
   },
   "dependencies": {
     "bcrypt": "^0.8.5",

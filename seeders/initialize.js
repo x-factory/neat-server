@@ -51,6 +51,7 @@ function initSequelize(done, err) {
 }
 
 if (process.argv[2] === 'sync') {
+  models.sequelize.options.logging = false;
   initSequelize(function() {
     console.log('DB SYNCED');
     process.exit();
