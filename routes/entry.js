@@ -23,7 +23,7 @@ api.post('/authenticate', function(req, res) {
   }).then(function ffComparePassword(result) {
     if (result) {
       var token = jwt.sign(userInfo, secret, {
-        expiresInMinutes: 120
+        expiresInMinutes: 1440
       });
       res.json({ message: 'Enjoy your token', token: token });
     } else {

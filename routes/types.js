@@ -16,7 +16,7 @@ api.route('/types')
     models.Type.create({
       name: req.body.name,
     }).then(function ffCreateType(type) {
-      res.json({ message: 'Created type', type: type });
+      res.status(201).json({ message: 'Created type', type: type });
     }).catch(function postTypeCatchAll(error) {
       if (error.name == 'SequelizeValidationError') {
         res.status(400).json({ message: 'Invalid fields', details: error });
@@ -26,7 +26,7 @@ api.route('/types')
     });
   });
 
-api.route('/types/:type_id')
+api.route('/type/:type_id')
   .delete(function deleteType(req, res) {
     models.Type.destroy({
       where: {

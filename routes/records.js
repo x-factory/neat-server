@@ -84,7 +84,11 @@ api.route('/record/:record_id')
         returning: true
       });
     }).then(function ffUpdateRecord(affected) {
-      res.json({ message: 'Updated record', affected: affected });
+      if (affected[0] === 0) {
+        res.status(400).json({ message: 'Record does not exist' });
+      } else {
+        res.json({ message: 'Updated record', affected: affected });
+      }
     }).catch(function putRecordCatchAll(error) {
       switch (error.name) {
         case 'SequelizeValidationError':

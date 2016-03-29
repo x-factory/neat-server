@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bin/www"
+    "start": "nodemon ./bin/www",
+    "test": "node seeders/initialize.js sync && mocha",
+    "stop": "node seeders/initialize.js sync && mocha -R nyan"
   },
   "dependencies": {
     "bcrypt": "^0.8.5",
@@ -22,6 +24,9 @@
     "sequelize-cli": "^2.3.1"
   },
   "devDependencies": {
-    "nodemon": "^1.9.1"
+    "mocha": "^2.4.5",
+    "nodemon": "^1.9.1",
+    "should": "^8.3.0",
+    "supertest": "^1.2.0"
   }
 }
