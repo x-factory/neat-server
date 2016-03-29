@@ -152,7 +152,6 @@ describe('/api/user*', function() {
         .expect('Content-Type', /json/)
         .expect(401)
         .end(function(err, res) {
-          var user = res.body.user;
           res.status.should.equal(401);
           res.body.message.should.equal('User is not an admin');
           done();
@@ -235,7 +234,7 @@ describe('/api/user*', function() {
     // TODO only self set password (without using user/1 token)
     it('should be able to set a user\'s password', function(done) {
       server
-        .put('/api/user/4')
+        .put('/api/user/4') // newuser
         .send({ password: 'newpassword' })
         .set('Authorization', token)
         .expect('Content-Type', /json/)
@@ -254,7 +253,7 @@ describe('/api/user*', function() {
 
     it('should be able to reset a user\'s password', function(done) {
       server
-        .put('/api/user/4')
+        .put('/api/user/4') // newuser
         .send({ password: 'null', active: 'No' })
         .set('Authorization', token)
         .expect('Content-Type', /json/)
@@ -267,6 +266,82 @@ describe('/api/user*', function() {
           affected[0].should.equal(1);
           should(affectedUser.password).be.exactly(null);
           affectedUser.active.should.equal(false);
+          done();
+        });
+    });
+
+  });
+
+
+  describe('DELETE /user/:user_id', function() {
+    before(function(done) {
+      models.Location.create({
+        longitude: 12345,
+        latitude: 54312
+      }, {
+        logging: false
+      }).then(function(location) {
+        return models.Record.create({
+          severity: 3,
+          CreatorId: 2,
+          LocationId: location.id,
+          TypeId: 1
+        }, { logging: false });
+      }).then(function(record) {
+        done();
+      }).catch(function(error) {
+        throw error;
+      });
+    });
+
+    it('should only allow admin to delete a user', function(done) {
+      server
+        .del('/api/user/4') // newuser
+        .set('Authorization', standardToken)
+        .expect('Content-Type', /json/)
+        .expect(401)
+        .end(function(err, res) {
+          res.status.should.equal(401);
+          res.body.message.should.equal('User is not an admin');
+          done();
+        });
+    });
+
+    it('should retrun 400 status if a user does not exist', function(done) {
+      server
+        .del('/api/user/100')
+        .set('Authorization', token)
+        .expect('Content-Type', /json/)
+        .expect(400)
+        .end(function(err, res) {
+          res.status.should.equal(400);
+          res.body.message.should.equal('User does not exist');
+          done();
+        });
+    });
+
+    it('should perform soft delete if user has associated records', function(done) {
+      server
+        .del('/api/user/2')
+        .set('Authorization', token)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end(function(err, res) {
+          res.status.should.equal(200);
+          res.body.message.should.equal('Disabled user (active -> null)');
+          done();
+        });
+    });
+
+    it('should perform hard delete if user has no associated records', function(done) {
+      server
+        .del('/api/user/2')
+        .set('Authorization', token)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end(function(err, res) {
+          res.status.should.equal(200);
+          res.body.message.should.equal('Deleted user');
           done();
         });
     });
