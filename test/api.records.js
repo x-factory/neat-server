@@ -282,10 +282,70 @@ describe('/api/record*', function() {
           var updatedRecord = res.body.affected[1][0];
           res.status.should.equal(200);
           updatedRecord.LocationId.should.not.equal(newLocationId);
+          newLocationId = updatedRecord.LocationId;
           confirmUpdated(done, 1);
         });
     });
 
+  });
+
+
+  describe('DELETE /record/:record_id', function() {
+    var delRecordId;
+
+    before(function(done) {
+      server
+        .post('/api/records')
+        .send(recordValues)
+        .set('Authorization', token)
+        .expect('Content-Type', /json/)
+        .expect(201)
+        .end(function(err, res) {
+          delRecordId = res.body.record.id;
+          done();
+        });
+    });
+
+    it('should return 400 if record does not exist', function(done) {
+      server
+        .del('/api/record/100')
+        .set('Authorization', token)
+        .expect('Content-Type', /json/)
+        .expect(400)
+        .end(function(err, res) {
+          res.status.should.equal(400);
+          res.body.message.should.equal('Record does not exist');
+          done();
+        });
+    });
+
+    it('should delete a record without deleting location', function(done) {
+      server
+        .del('/api/record/' + newRecordId)
+        .set('Authorization', token)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end(function(err, res) {
+          res.status.should.equal(200);
+          res.body.status.destroyed.should.equal(true);
+          res.body.status.locationDestroyed.should.equal(false);
+          done();
+        });
+    });
+
+    it('should delete a record and a location that no record uses', function(done) {
+      server
+        .del('/api/record/' + delRecordId)
+        .set('Authorization', token)
+        .expect('Content-Type', /json/)
+        .expect(200)
+        .end(function(err, res) {
+          res.status.should.equal(200);
+          res.body.status.destroyed.should.equal(true);
+          res.body.status.locationDestroyed.should.equal(true);
+          done();
+        });
+    });
   });
 
 });
