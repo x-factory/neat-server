@@ -13,7 +13,7 @@ function adminRequired(req, res, next) {
 api.route('/users')
   .get(function getUser(req, res) {
     models.User.findAll({
-      include: [ models.Record ]
+      attributes: { exclude: ['password', 'createdAt', 'updatedAt'] }
     }).then(function ffFindAllUsers(users) {
       res.json({ users: users });
     }).catch(function getUserCatchAll(error) {

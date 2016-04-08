@@ -30,9 +30,16 @@ module.exports = function(sequelize, DataTypes) {
       defaultValue: false
     }
   }, { // option object
+    getterMethods: {
+      hasPass: function() {
+        return this.password !== null;
+      }
+    },
     classMethods: {
       associate: function(models) {
-        User.hasMany(models.Record);
+        // won't be able to include Edited Recrods, only created records
+        // delete will check on its own
+        User.hasMany(models.Record, { foreignKey: 'CreatorId' });
       }
     },
     instanceMethods: {
