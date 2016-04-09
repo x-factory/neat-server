@@ -27,14 +27,15 @@ module.exports = function(sequelize, DataTypes) {
     },
     active: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false
+      defaultValue: false,
+      allowNull: false
+    },
+    disabled: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false
     }
   }, { // option object
-    getterMethods: {
-      hasPass: function() {
-        return this.password !== null;
-      }
-    },
     classMethods: {
       associate: function(models) {
         // won't be able to include Edited Recrods, only created records
