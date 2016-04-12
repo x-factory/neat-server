@@ -5,7 +5,6 @@ var api = express.Router();
 api.route('/types')
   .get(function getType(req, res) {
     models.Type.findAll({
-      include: [ models.Record ]
     }).then(function ffFindAllTypes(types) {
       res.status(200).json({ types: types });
     }).catch(function getTypeCatchAll(error) {
