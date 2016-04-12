@@ -1,5 +1,6 @@
 require('dotenv').config();
 var models = require('../models');
+var fakeUsers = require('./fakeUsers');
 
 var defaultTypes = [
   { name: 'Lighting' },
@@ -44,7 +45,12 @@ function initSequelize(done, err) {
     }
     return user;
   }).then(function(ready) {
-    done();
+    if (process.env.NODE_ENV === 'development') {
+      fakeUsers(done);
+    } else {
+      done();
+    }
+    return ready;
   }).catch(function(error) {
     err(error);
   });

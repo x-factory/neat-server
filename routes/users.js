@@ -10,10 +10,30 @@ function adminRequired(req, res, next) {
   return next();
 }
 
+api.get('/me', function getMe(req, res) {
+  models.User.findById(req.user.ownid, {
+    attributes: { exclude: ['password', 'createdAt', 'updatedAt'] }
+  })
+    .then(function ffFindMe(user) {
+      res.json({ user: user });
+    }).catch(function findMeCatchAll(error) {
+      res.status(500).json({
+        message: 'Failed to find me',
+        details: error
+      });
+    });
+});
+
 api.route('/users')
   .get(function getUser(req, res) {
+    var where = { disabled: false };
+    if (req.query.disabled == 1) {
+      where.disabled = true;
+    }
     models.User.findAll({
-      include: [ models.Record ]
+      attributes: { exclude: ['password', 'createdAt', 'updatedAt'] },
+      where: where,
+      order: [ ['id'] ]
     }).then(function ffFindAllUsers(users) {
       res.json({ users: users });
     }).catch(function getUserCatchAll(error) {
@@ -26,7 +46,7 @@ api.route('/users')
       email: req.body.email,
       // created user inactive by default therefore null password
       privilege: req.body.privilege
-      // when first created, default to active: false
+      // when first created, active and disabled default to false
     }).then(function ffCreateUser(user) {
       res.status(201).json({
         message: 'Created user', user: user
@@ -45,6 +65,23 @@ api.route('/users')
           });
       }
     });
+  })
+  .delete(adminRequired, function deleteUsers(req, res) {
+    models.User.destroy({
+      where: {
+        disabled: true
+      }
+    }).then(function ffDeleteUsers(affected) {
+      res.json({
+        message: 'Deleted all disabled users',
+        affected: affected
+      });
+    }).catch(function deleteUsersCatchAll(error) {
+      res.status(500).json({
+        message: 'Failed to delete all disabled users',
+        details: error
+      });
+    });
   });
 
 api.route('/user/:user_id')
@@ -58,14 +95,19 @@ api.route('/user/:user_id')
   .put(function putUserRuleCheck(req, res, next) {
     var userValues = {};
     var b = req.body;
+    req.pwHook = false;
     if (b.name)      userValues.name      = b.name;
-    if (b.password)  userValues.password  = b.password;
     if (b.privilege) userValues.privilege = b.privilege;
     if (b.active)    userValues.active    = b.active;
+    if (b.disabled)  userValues.disabled  = b.disabled;
+    if (b.password)  {
+      userValues.password = b.password;
+      req.pwHook = true;
+    }
     if (_.isEmpty(userValues)) {
       return res.status(400).json({ message: 'No input provided' });
     }
-    var isAdminAction = b.privilege || b.active;
+    var isAdminAction = b.privilege || b.active || b.disabled;
     if (isAdminAction && !req.user.admin) {
       return res.status(401).json({ message: 'User is not an admin' });
     }
@@ -77,7 +119,7 @@ api.route('/user/:user_id')
   }, function putUser(req, res) {
     models.User.update(req.newUserValues, {
       where: { id: req.params.user_id },
-      individualHooks: true,
+      individualHooks: req.pwHook,
       returning: true
     }).then(function ffUpdateUser(affected) {
       if (affected[0] === 0) {
@@ -103,18 +145,18 @@ api.route('/user/:user_id')
       hardDelete = count === 0;
       return models.User.findById(userId);
     }).then(function ffFindUserById(user) {
-      hardDelete = hardDelete || (user && user.active === null);
+      hardDelete = hardDelete || (user && user.disabled);
       var where = { where: { id: userId } };
       return hardDelete // set acitve to null as soft delete
         ? models.User.destroy(where)
-        : models.User.update({ active: null }, where);
+        : models.User.update({ disabled: true }, where);
     }).then(function ffHardOrSoftDeleteUser(result) {
       if (result === 0) {
         res.status(400).json({ message: 'User does not exist' });
       } else if (result === 1) { // hard delete successful
-        res.json({ message: 'Deleted user' });
+        res.json({ message: 'Deleted forever' });
       } else { // soft delete successful
-        res.json({ message: 'Disabled user (active -> null)', user: result });
+        res.json({ message: 'Disabled user', user: result });
       }
     }).catch(function deleteUserCatchAll(error) {
       res.status(500).json({

@@ -27,12 +27,20 @@ module.exports = function(sequelize, DataTypes) {
     },
     active: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false
+      defaultValue: false,
+      allowNull: false
+    },
+    disabled: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false
     }
   }, { // option object
     classMethods: {
       associate: function(models) {
-        User.hasMany(models.Record);
+        // won't be able to include Edited Recrods, only created records
+        // delete will check on its own
+        User.hasMany(models.Record, { foreignKey: 'CreatorId' });
       }
     },
     instanceMethods: {
