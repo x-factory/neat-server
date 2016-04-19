@@ -4,7 +4,7 @@ var api = express.Router();
 
 api.route('/records')
   .get(function getRecord(req, res) {
-    models.Record.findAll({
+    var recordOptions = {
       include: [
         {
           model: models.User,
@@ -17,12 +17,31 @@ api.route('/records')
         },
         models.Location,
         models.Type
-      ]
-    }).then(function ffFindAllRecords(records) {
-      res.json({ records: records });
-    }).catch(function getRecordCatchAll(error) {
-      res.status(500).json({ message: 'Error finding records', error: error });
-    });
+      ],
+      where: {}
+    };
+
+    if (req.query.ftypes) {
+      var includeTypes = req.query.ftypes.split(',');
+      includeTypes = includeTypes.map(function mapTypes(typeId) {
+        return { TypeId: typeId };
+      });
+      recordOptions.where.$or = includeTypes;
+    }
+
+    if (req.query.fseverity) {
+      var onlySeverity = req.query.fseverity;
+      recordOptions.where.$and = {
+        severity: req.query.fseverity
+      };
+    }
+
+    models.Record.findAll(recordOptions)
+      .then(function ffFindAllRecords(records) {
+        res.json({ records: records });
+      }).catch(function getRecordCatchAll(error) {
+        res.status(500).json({ message: 'Error finding records', error: error });
+      });
   })
   .post(function postRecord(req, res) {
     var defaultLocation = {
