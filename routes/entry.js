@@ -76,10 +76,12 @@ api
         res.status(403).json({ message: 'User already active' });
       } else if (result == 'disabled') {
         res.status(403).json({ message: 'User is disabled' });
-      } else if (result) {
+      } else if (result[0] === 1) {
+        var user = result[1][0];
+        user.password = 'hidden';
         res.json({
           message: 'Updated user password and active status',
-          result: result
+          user: user
         });
       } else {
         res.status(400).json({ message: 'Email does not exist' });
