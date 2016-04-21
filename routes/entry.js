@@ -51,6 +51,12 @@ api
       }
     }).then(function ffFindUserByEmail(user) {
       if (user) {
+        if (user.active) {
+          return 'active';
+        }
+        if (user.disabled) {
+          return 'disabled';
+        }
         var userValues = {
           email: b.email,
           password: b.password
@@ -66,7 +72,11 @@ api
       }
       return null;
     }).then(function ffUpdateUser(result) {
-      if (result) {
+      if (result == 'active') {
+        res.status(403).json({ message: 'User already active' });
+      } else if (result == 'disabled') {
+        res.status(403).json({ message: 'User is disabled' });
+      } else if (result) {
         res.json({
           message: 'Updated user password and active status',
           result: result
