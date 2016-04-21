@@ -13,20 +13,13 @@ var fakeUsers = [
     email: 'martin@gmail.com',
     privilege: 'A',
     password: 'supersecret',
-    active: true
+    active: false
   },
   {
     name: 'Slevin Zhang',
     email: 'slevin@gmail.com',
     privilege: 'M',
     active: false
-  },
-  {
-    name: 'Random Name',
-    email: 'random@random.org',
-    privilege: 'M',
-    password: 'supersecret',
-    active: true
   },
   {
     name: 'John Shaw',
@@ -36,7 +29,7 @@ var fakeUsers = [
   },
   {
     name: 'Rich Freeman',
-    email: 'rich@gmail.com',
+    email: 'rich@gc.ca',
     privilege: 'M',
     password: 'supersecret',
     active: true
@@ -53,13 +46,6 @@ var fakeUsers = [
     email: 'stevejobs@apple.heaven',
     privilege: 'M',
     disabled: true
-  },
-  {
-    name: 'Scott McDonald',
-    email: 'scott@McDonald.com',
-    privilege: 'M',
-    password: 'supersecret',
-    active: true
   }
 ];
 
