@@ -134,6 +134,9 @@ api.route('/user/:user_id')
   .delete(adminRequired, function deleteUser(req, res) {
     var hardDelete = false;
     var userId = req.params.user_id;
+    if (userId == 1) {
+      return res.status(401).json({ message: 'Cannot delete superuser' });
+    }
     models.Record.count({ // check if there are associated records
       where: {
         $or: [

@@ -24,7 +24,7 @@ api
     }).then(function ffComparePassword(result) {
       if (result) {
         var token = jwt.sign(userInfo, secret, {
-          expiresInMinutes: 1440
+          expiresInMinutes: 10080
         });
         res.json({ message: 'Enjoy your token', token: token });
       } else {
