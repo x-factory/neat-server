@@ -93,6 +93,9 @@ api.route('/user/:user_id')
       });
   })
   .put(function putUserRuleCheck(req, res, next) {
+    if (req.params.user_id == 1) {
+      return res.status(401).json({ message: 'Cannot update superuser' });
+    }
     var userValues = {};
     var b = req.body;
     req.pwHook = false;

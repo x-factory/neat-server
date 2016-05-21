@@ -22,12 +22,6 @@ var fakeUsers = [
     active: false
   },
   {
-    name: 'Guest Demo',
-    email: 'guest@slevin.im',
-    privilege: 'M',
-    active: false
-  },
-  {
     name: 'John Shaw',
     email: 'john@gmail.com',
     privilege: 'A',
