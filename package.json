@@ -17,6 +17,9 @@
     "sequelize": "^3.20.0",
     "sequelize-cli": "^2.3.1"
   },
+  "engines": {
+    "node": "4.4.3"
+  },
   "devDependencies": {
     "nodemon": "^1.9.1"
   }
